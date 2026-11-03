@@ -1,2 +1,8 @@
 matrix_id,rows,cols,nnz,matrix_group
-
+pilot_banded_80,80,80,394,synthetic_banded
+pilot_dense_block_50,50,50,2500,synthetic_dense
+pilot_diag_100,100,100,100,synthetic_diagonal
+pilot_empty_rows_60,60,60,185,synthetic_sparse
+pilot_large_sparse,500,500,1489,synthetic_sparse
+pilot_skew_150,150,150,524,synthetic_skewed
+pilot_uniform_200,200,200,2000,synthetic_uniform

@@ -1,2 +1,8 @@
 matrix_id,split
-
+pilot_banded_80,train
+pilot_dense_block_50,train
+pilot_diag_100,test
+pilot_empty_rows_60,val
+pilot_large_sparse,val
+pilot_skew_150,test
+pilot_uniform_200,val

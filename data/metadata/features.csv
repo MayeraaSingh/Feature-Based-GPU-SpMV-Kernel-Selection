@@ -1,2 +1,8 @@
 matrix_id,rows,cols,nnz,mean_row_nnz,variance_row_nnz,max_row_nnz,min_row_nnz
-
+pilot_banded_80,80,80,394,4.925,0.119375,5,3
+pilot_dense_block_50,50,50,2500,50.0,0.0,50,50
+pilot_diag_100,100,100,100,1.0,0.0,1,1
+pilot_empty_rows_60,60,60,185,3.083333,6.876389,7,0
+pilot_large_sparse,500,500,1489,2.978,3.165516,13,0
+pilot_skew_150,150,150,524,3.493333,26.409956,37,1
+pilot_uniform_200,200,200,2000,10.0,0.0,10,10

@@ -1,16 +1,39 @@
 # Dataset Curation and Processing Configuration
+# ==============================================
+# Member 2 — data_pipeline configuration
+#
+# IMPORTANT: The pipeline is dataset-source agnostic.
+# Place sparse matrix files (.mtx or .npz) in `raw_dir` before running.
+# SuiteSparse downloads are NOT automated; copy files manually after obtaining them.
+# Use `--pilot` flag (python scripts/run_pipeline.py --pilot) for synthetic dev data.
+
 dataset:
   raw_dir: "data/raw"
   processed_dir: "data/processed"
   metadata_dir: "data/metadata"
-  
+
+# matrix_sources is informational only; the pipeline reads from raw_dir directly.
+# Set enabled: false for any source that is unavailable or not yet agreed by the team.
 matrix_sources:
   suite_sparse:
-    enabled: true
+    enabled: false            # currently offline (403 errors); do not auto-download
+    notes: >
+      SuiteSparse Matrix Collection (https://sparse.tamu.edu/) is the intended
+      primary source for the final dataset, but as of project start it is
+      reporting 403 errors for matrix-file downloads. Place manually obtained
+      .mtx files in data/raw/ when available.
     target_groups:
       - "synthetic"
       - "scientific"
       - "graph"
+
+# Optional: matrix_id → matrix_group mapping for matrices without embedded metadata.
+# Add entries here when ingesting real matrices that lack group labels.
+# Example:
+#   matrix_groups:
+#     cage4: finite_element
+#     web-Google: directed_graph
+matrix_groups: {}
 
 feature_extraction:
   features:
@@ -21,11 +44,13 @@ feature_extraction:
     - variance_row_nnz
     - max_row_nnz
     - min_row_nnz
+  variance_convention: population   # ddof=0; see data_pipeline/README.md
 
 splits:
   train_ratio: 0.70
   val_ratio: 0.15
   test_ratio: 0.15
   random_seed: 42
+  # "matrix_group" → group-stratified split (recommended; prevents group leakage).
+  # "random"       → per-matrix random assignment (for comparison only).
   stratify_by: "matrix_group"
-
