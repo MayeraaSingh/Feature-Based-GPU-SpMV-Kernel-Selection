@@ -1,0 +1,88 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter Notebooks
+.ipynb_checkpoints
+*-checkpoint.ipynb
+
+# IDE & Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# C / C++ / CUDA Build Artifacts
+*.o
+*.obj
+*.exe
+*.dll
+*.dylib
+*.a
+*.lib
+*.so
+*.out
+*.app
+*.exp
+*.ilk
+*.pdb
+bin/
+obj/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.ninja
+.ninja_deps
+.ninja_log
+
+# Data & Large Files (Track placeholders, ignore raw matrices and bulk dumps)
+data/raw/*
+!data/raw/README.md
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/README.md
+!data/processed/.gitkeep
+
+# Exclude generated matrix artifacts (.mtx, .bin, .npz, .h5, etc.)
+*.mtx
+*.tar.gz
+*.tar.bz2
+*.zip
+*.bin
+*.npz
+
+# Benchmark outputs & run logs
+benchmarks/logs/
+*.log
+

@@ -1,0 +1,31 @@
+# Dataset Curation and Processing Configuration
+dataset:
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  metadata_dir: "data/metadata"
+  
+matrix_sources:
+  suite_sparse:
+    enabled: true
+    target_groups:
+      - "synthetic"
+      - "scientific"
+      - "graph"
+
+feature_extraction:
+  features:
+    - rows
+    - cols
+    - nnz
+    - mean_row_nnz
+    - variance_row_nnz
+    - max_row_nnz
+    - min_row_nnz
+
+splits:
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+  random_seed: 42
+  stratify_by: "matrix_group"
+
