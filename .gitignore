@@ -86,3 +86,7 @@ data/processed/*
 benchmarks/logs/
 *.log
 
+# Trained selector models (pickled; regenerate from config + data)
+results/**/*.joblib
+# Synthetic demo inputs (regenerate with scripts/make_synthetic_demo.py)
+data/synthetic_demo/
