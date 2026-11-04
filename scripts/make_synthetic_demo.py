@@ -17,6 +17,7 @@ Usage
 
 from __future__ import annotations
 
+import importlib.util
 import sys
 from pathlib import Path
 
@@ -26,7 +27,22 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from selector.config import DEFAULT_CONFIG_PATH  # noqa: E402
-from tests.fixtures.synthetic_timings import write_files  # noqa: E402
+
+
+def _load_write_files():
+    """Load the synthetic generator by FILE PATH, not by the package name ``tests``.
+
+    Another package called ``tests`` (e.g. Colab's dist-packages) can shadow ours; a
+    path-based load cannot be shadowed.
+    """
+    path = ROOT / "tests" / "fixtures" / "synthetic_timings.py"
+    spec = importlib.util.spec_from_file_location("spmv_synthetic_timings", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.write_files
+
+
+write_files = _load_write_files()
 
 
 def _display(path: Path) -> str:

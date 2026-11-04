@@ -26,6 +26,12 @@ All tests are CPU-only and build their inputs programmatically (`tmp_path`); no 
 - `test_selector_model.py`: model determinism, save/load, feature-order checks, baselines, training, **no-test-leakage** tests.
 - `test_evaluation_e2e.py`: evaluate, tables, plots, config and both CLI scripts end to end.
 
+## Why `tests/` is a Python package
+
+`tests/__init__.py` and `tests/fixtures/__init__.py` must stay. Some environments (Google Colab)
+ship their own top-level package called `tests`, which beats a folder without `__init__.py` and
+breaks `from tests.fixtures... import ...`. `test_import_isolation.py` guards against this.
+
 ## Synthetic fixtures
 
 `fixtures/synthetic_timings.py` generates **synthetic** timings from an invented formula. They exist
