@@ -41,7 +41,7 @@ The project decouples matrix preprocessing, GPU benchmarking, and selector train
    [Optional Calibration]
 ```
 
-See [docs/architecture.md](file:///c:/Projects/Feature-Based GPU SpMV Kernel Selection/docs/architecture.md) for full architecture details.
+See [docs/architecture.md](docs/architecture.md) for full architecture details.
 
 ## Team Responsibilities
 
@@ -105,7 +105,7 @@ spmv-kernel-selection/
 
 ## Shared Data Contracts
 
-All components interact via structured CSV contracts documented in [docs/data_dictionary.md](file:///c:/Projects/Feature-Based GPU SpMV Kernel Selection/docs/data_dictionary.md):
+All components interact via structured CSV contracts documented in [docs/data_dictionary.md](docs/data_dictionary.md):
 - `data/metadata/matrix_catalog.csv`: Inventory of sparse matrices (`matrix_id,rows,cols,nnz,matrix_group`).
 - `data/metadata/features.csv`: Extracted matrix properties (`matrix_id,rows,cols,nnz,mean_row_nnz,variance_row_nnz,max_row_nnz,min_row_nnz`).
 - `data/metadata/splits.csv`: Train, validation, and held-out partition assignments (`matrix_id,split`).
@@ -147,6 +147,35 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+### Running the selector and evaluation (Member 3)
+
+The selector and evaluation code needs **no GPU**; it runs on a CPU laptop or in Google Colab. It
+consumes the four CSV contracts above. Protocol, metric definitions and open decisions:
+[docs/selector_evaluation.md](docs/selector_evaluation.md).
+
+```bash
+pytest tests/ -q                                  # all tests (about a minute)
+
+# With real data (needs Member 1's benchmarks/kernel_timings.csv):
+python scripts/train_selector.py --config configs/selector_config.yaml
+python scripts/evaluate_generalization.py --config configs/selector_config.yaml --run-dir results/<run_id>
+
+# Without real timings: SYNTHETIC demo (outputs are stamped "NOT A RESULT")
+python scripts/make_synthetic_demo.py
+python scripts/train_selector.py --config data/synthetic_demo/demo_config.yaml --allow-synthetic --run-id demo
+python scripts/evaluate_generalization.py --config data/synthetic_demo/demo_config.yaml --allow-synthetic --run-dir results/demo
+```
+
+Outputs go to `results/<run_id>/` (tables, figures, model card). A Colab runner is in
+[notebooks/colab_run.ipynb](notebooks/colab_run.ipynb). **No real timing data exists yet**, so no real
+results have been produced.
+
+> **Terminology note ("calibration"):** the objectives above describe *confidence calibration*
+> (probability calibration and a low-confidence fallback). The Member 3 plan defines the optional
+> calibration study as *measurement-based*: run a few candidate kernels on a new matrix and count that
+> cost as overhead. The team should agree on one meaning before that optional step is built; see
+> section 10 of [docs/selector_evaluation.md](docs/selector_evaluation.md).
+
 ## Contributing and Integrating Work
 
 Because only one laptop has CUDA hardware, all members collaborate through decoupled data contracts:
@@ -160,5 +189,5 @@ Because only one laptop has CUDA hardware, all members collaborate through decou
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](file:///c:/Projects/Feature-Based GPU SpMV Kernel Selection/LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
