@@ -88,7 +88,7 @@ def measure_tie_tolerance(summary: pd.DataFrame, train_val_ids: Sequence[str], f
     else:
         stat, method = out["median_relative_iqr_of_winner"], "median relative IQR of the winner (train+val), fallback: no repeat run"
     out["method"] = method
-    out["tie_tolerance"] = max(floor, float(np.ceil(stat * 100) / 100)) if np.isfinite(stat) else floor
+    out["tie_tolerance"] = max(floor, float(np.ceil(stat * 100 - 1e-9) / 100)) if np.isfinite(stat) else floor
     return out
 
 
