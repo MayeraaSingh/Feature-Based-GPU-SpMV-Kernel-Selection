@@ -191,13 +191,13 @@ Markdown tables, a banner plus watermark on every figure, and the marker file.
 | T3 | A missing candidate-kernel row excludes the matrix (reported) | Implemented |
 | T4 | `val` vs `validation` in the original brief | Contract wins (`val`) |
 
-### Terminology: two meanings of "calibration"
-`README.md` and `docs/architecture.md` describe **confidence calibration** (probability
-calibration, ECE, reliability diagrams, low-confidence fallback). The Member 3 brief defines
-**measurement-based calibration**: run a subset of candidate kernels on the new matrix and
-count that cost as overhead. The implementation (Milestone 6, optional, not started) follows
-the brief. **Members 1 and 2 must agree on this wording** before it is built; the shared docs
-have deliberately not been edited.
+### Terminology: "calibration" (resolved)
+Earlier drafts of `README.md` and `docs/architecture.md` used *calibration* for **confidence
+calibration** (probability calibration, ECE, reliability diagrams), while the Member 3 brief
+defined **measurement-based calibration** (run a subset of candidate kernels on the new matrix
+and count that cost as overhead). The project now uses the measurement-based meaning only;
+the README and architecture documents were updated accordingly. Probability calibration of
+the Random Forest is out of scope.
 
 ## 11. Optional calibration study (not implemented)
 

@@ -41,7 +41,9 @@ logger = logging.getLogger(__name__)
 DEFAULT_TOLERANCE: float = 1e-5
 
 
-def reference_vector(cols: int, seed: int = 42, dtype: np.dtype = np.float64) -> np.ndarray:
+def reference_vector(
+    cols: int, seed: int = 42, dtype: np.dtype = np.float64, mixed_sign: bool = False
+) -> np.ndarray:
     """Generate the reference input vector x.
 
     Parameters
@@ -52,13 +54,20 @@ def reference_vector(cols: int, seed: int = 42, dtype: np.dtype = np.float64) ->
         Random seed for reproducibility.
     dtype : numpy dtype
         Data type for the output vector.
+    mixed_sign : bool
+        False (default, original behaviour): values in [0, 1).  True: values in
+        [-1, 1), which exercises cancellation in dot products (a stricter
+        correctness test than an all-positive x).
 
     Returns
     -------
-    np.ndarray of shape (cols,) with values in [0, 1).
+    np.ndarray of shape (cols,).
     """
     rng = np.random.default_rng(seed)
-    return rng.random(cols).astype(dtype)
+    x = rng.random(cols)
+    if mixed_sign:
+        x = 2.0 * x - 1.0
+    return x.astype(dtype)
 
 
 def cpu_spmv(

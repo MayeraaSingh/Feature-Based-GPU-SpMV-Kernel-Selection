@@ -156,60 +156,67 @@ def _group_split(
     val_ratio: float,
     rng: np.random.Generator,
 ) -> SplitManifest:
-    """Assign splits at the group level.
+    """Assign splits at the group level (all matrices of a group share a split).
 
-    All matrices in a group go to the same split.  Groups are shuffled
-    randomly (with the given seed) and then packed greedily into splits
-    while honouring the target proportions as closely as possible.
+    Size-aware greedy packing: groups are processed from largest to smallest (ties
+    in random order, from the seeded generator) and each group goes to the split
+    whose resulting size vector is closest (squared error) to the target
+    proportions.  The earlier implementation ignored group size, so a single large
+    group could land in val/test and leave train tiny (e.g. 9/12/38 of 59 matrices
+    for a 70/15/15 target); see tests/test_splits_regression.py.
 
-    If a group is larger than the test or val quota, the overflow is
-    absorbed into train (and a warning is emitted).
+    Guarantee: when there are at least 3 groups, val and test are both non-empty
+    (a split that stays empty receives the smallest remaining group).
     """
-    # Build group → sorted list of matrix_ids
     from collections import defaultdict
-    group_map: Dict[str, List[str]] = defaultdict(list)
-    unknown_group = "unknown"
-    for mid in sorted(matrix_ids):
-        g = groups.get(mid, unknown_group)
-        group_map[g].append(mid)
 
-    # Shuffle the group order
-    group_names = sorted(group_map.keys())
-    rng.shuffle(group_names)
+    group_map: Dict[str, List[str]] = defaultdict(list)
+    for mid in sorted(matrix_ids):
+        group_map[groups.get(mid, "unknown")].append(mid)
+
+    names = sorted(group_map.keys())
+    rng.shuffle(names)                                   # random tie-breaking
+    names.sort(key=lambda g: -len(group_map[g]))         # stable: largest first
 
     n_total = len(matrix_ids)
-    target_val = math.ceil(n_total * val_ratio)
-    target_test = math.ceil(n_total * (1.0 - train_ratio - val_ratio))
-    # Clamp
-    target_test = max(0, min(target_test, n_total))
-    target_val = max(0, min(target_val, n_total - target_test))
-
+    targets = {
+        "train": train_ratio * n_total,
+        "val": val_ratio * n_total,
+        "test": (1.0 - train_ratio - val_ratio) * n_total,
+    }
+    counts = {"train": 0, "val": 0, "test": 0}
     manifest: SplitManifest = {}
-    n_val_so_far = 0
-    n_test_so_far = 0
 
-    for g in group_names:
-        mids = group_map[g]
-        g_size = len(mids)
-
-        # Decide which split this group belongs to
-        if n_test_so_far < target_test:
-            label = "test"
-            n_test_so_far += g_size
-        elif n_val_so_far < target_val:
-            label = "val"
-            n_val_so_far += g_size
+    for idx, g in enumerate(names):
+        size = len(group_map[g])
+        remaining = len(names) - idx - 1
+        empty = [s for s in ("test", "val") if counts[s] == 0 and targets[s] > 0]
+        if empty and remaining < len(empty):
+            # not enough groups left to fill every empty split: fill one now
+            label = empty[0]
         else:
-            label = "train"
-
-        for mid in mids:
+            def cost(s: str) -> float:
+                return sum(
+                    ((counts[t] + (size if t == s else 0)) - targets[t]) ** 2 for t in counts
+                )
+            label = min(("train", "val", "test"), key=lambda s: (cost(s), s))
+        counts[label] += size
+        for mid in group_map[g]:
             manifest[mid] = label
 
-    # Any matrix_id not yet assigned (e.g. missing from groups) → train
-    for mid in matrix_ids:
-        if mid not in manifest:
-            manifest[mid] = "train"
+    for mid in matrix_ids:  # defensive; every id belongs to some group above
+        manifest.setdefault(mid, "train")
 
+    achieved = {k: v / n_total for k, v in counts.items()}
+    want = {"train": train_ratio, "val": val_ratio, "test": 1.0 - train_ratio - val_ratio}
+    worst = max(abs(achieved[k] - want[k]) for k in want)
+    if worst > 0.10:
+        logger.warning(
+            "Group split deviates from target proportions by up to %.1f percentage points "
+            "(achieved train/val/test = %.2f/%.2f/%.2f). Few or very unequal groups make "
+            "exact proportions impossible; the achieved sizes are what is evaluated.",
+            100 * worst, achieved["train"], achieved["val"], achieved["test"],
+        )
     return manifest
 
 

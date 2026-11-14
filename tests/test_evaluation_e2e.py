@@ -327,6 +327,11 @@ def cli_env(tmp_path_factory):
     return base, cfg_path, paths
 
 
+def _relabel_val_split(splits):
+    """Corrupt a splits frame in place (plain assignment: no chained-assignment warning)."""
+    splits["split"] = splits["split"].replace("val", "validation")
+
+
 class TestCli:
     def test_synthetic_input_refused_without_flag(self, cli_env):
         base, cfg, _ = cli_env
@@ -390,7 +395,7 @@ class TestCli:
     @pytest.mark.parametrize("name,corrupt,message", [
         ("dup_id", lambda t: t.update(features=pd.concat([t["features"], t["features"].iloc[[0]]])),
          "duplicate matrix_id"),
-        ("bad_split", lambda t: t["splits"].__setitem__("split", t["splits"]["split"].replace("val", "validation")),
+        ("bad_split", lambda t: _relabel_val_split(t["splits"]),
          "invalid split label"),
     ])
     def test_corrupt_inputs_give_clear_errors(self, cli_env, tmp_path, name, corrupt, message):
