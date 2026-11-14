@@ -1,0 +1,36 @@
+{
+  "source": "NIST Matrix Market",
+  "manifest_csv_sha256": "963b0cb684cedb475bbe15b9724fea7a8250d8fa5c9bb61f91bbc9992c5c5082",
+  "n_matrices": 122,
+  "groups": [
+    "airfoil",
+    "astroph",
+    "bcspwr",
+    "bcsstruc",
+    "crystal",
+    "cylshell",
+    "drivcav",
+    "dwave",
+    "dwt",
+    "econaus",
+    "econiea",
+    "fidap",
+    "gemat",
+    "hamm",
+    "lns",
+    "lshape",
+    "mhd",
+    "mvmrwk",
+    "platz",
+    "psmigr",
+    "saylor",
+    "sherman",
+    "tokamak"
+  ],
+  "split_counts": {
+    "train": 86,
+    "val": 18,
+    "test": 18
+  },
+  "split_seed": 20261115
+}

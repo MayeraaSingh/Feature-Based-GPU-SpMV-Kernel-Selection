@@ -1,0 +1,40 @@
+# Real-data configuration: NIST Matrix Market matrices (see docs/dataset_provenance.md).
+# Real artifacts are kept apart from the synthetic pilot files so the two never mix:
+#   raw matrices      data/raw/matrix_market/        (git-ignored; fetched by scripts/acquire_dataset.py)
+#   shared CSVs       data/metadata/real/            (features, catalog, splits, exclusion log)
+#   provenance        data/metadata/dataset_manifest.csv (matrix_group is taken from here)
+
+dataset:
+  raw_dir: "data/raw/matrix_market"
+  processed_dir: "data/processed"
+  metadata_dir: "data/metadata/real"
+  manifest: "data/metadata/dataset_manifest.csv"
+
+matrix_sources:
+  nist_matrix_market:
+    enabled: true
+    url: "https://math.nist.gov/MatrixMarket/"
+  suite_sparse:
+    enabled: false   # file downloads returned HTTP 403 when the project started
+    notes: "Not used; see docs/dataset_provenance.md."
+
+matrix_groups: {}
+
+feature_extraction:
+  features: [rows, cols, nnz, mean_row_nnz, variance_row_nnz, max_row_nnz, min_row_nnz]
+  variance_convention: population
+  extended: true   # also write features_extended.csv (4 extra row-distribution features)
+
+# Drop exact duplicate sparsity patterns (same structure, different values): they add no
+# structural information. Every drop is logged in data/metadata/real/redundancy_log.csv.
+curation:
+  drop_identical_patterns: true
+
+# The split is FROZEN before any timing exists: seed and ratios are recorded in the
+# run manifest and docs/dataset_provenance.md. Do not change them after looking at test results.
+splits:
+  train_ratio: 0.70
+  val_ratio: 0.15
+  test_ratio: 0.15
+  random_seed: 20261115
+  stratify_by: "matrix_group"

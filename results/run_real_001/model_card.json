@@ -1,0 +1,47 @@
+{
+  "rf_original": {
+    "params": {
+      "class_weight": null,
+      "max_depth": null,
+      "min_samples_leaf": 1,
+      "n_estimators": 100
+    },
+    "features": [
+      "rows",
+      "cols",
+      "nnz",
+      "mean_row_nnz",
+      "variance_row_nnz",
+      "max_row_nnz",
+      "min_row_nnz"
+    ],
+    "classes": [
+      "csr_adaptive",
+      "csr_scalar",
+      "csr_vector",
+      "cusparse"
+    ]
+  },
+  "decision_tree_params": {
+    "max_depth": 3,
+    "min_samples_leaf": 1
+  },
+  "rowlen_rule": "mean_row_nnz in (-inf, 15.1] -> csr_scalar; mean_row_nnz in (15.1, 63.3] -> csr_adaptive; mean_row_nnz in (63.3, inf] -> cusparse",
+  "feature_importance_rf_original": {
+    "rows": 0.16778732333387908,
+    "cols": 0.1970034256570462,
+    "nnz": 0.21671297035690837,
+    "mean_row_nnz": 0.13145764924747752,
+    "variance_row_nnz": 0.13603365334691744,
+    "max_row_nnz": 0.10593167948801774,
+    "min_row_nnz": 0.04507329856975362
+  },
+  "versions": {
+    "python": "3.13.7",
+    "scikit-learn": "1.7.2",
+    "numpy": "2.3.3",
+    "pandas": "2.3.3",
+    "scipy": "1.16.2",
+    "joblib": "1.5.2"
+  }
+}

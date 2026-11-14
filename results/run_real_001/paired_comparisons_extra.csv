@@ -1,0 +1,3 @@
+method_a,method_b,n_groups,n_matrices,mean_group_diff,effect_size_dz,ci_low,ci_high,p_value,p_floor,p_holm
+rf_extended_11,rf_original,7,18,0.17857053370439419,0.3818986724005022,0.0,0.3539756950418627,0.5,0.015625,1.0
+rf_extended_11,fixed_best_train,7,18,0.006596846559744003,0.012988932081190105,-0.23632169166959086,0.2153969412842783,0.96875,0.015625,1.0

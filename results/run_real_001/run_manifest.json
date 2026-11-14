@@ -1,0 +1,74 @@
+{
+  "run_id": "run_real_001",
+  "git": {
+    "commit": "829e8e0ff1e8a1903020911723ec7f6e11dc74ad",
+    "branch": "research-development",
+    "dirty": true
+  },
+  "seeds": {
+    "split_seed": 20261115,
+    "model_seed": 0,
+    "bootstrap": 0
+  },
+  "tie_tolerance": {
+    "median_relative_iqr_of_winner": 0.20142264007351984,
+    "p90_relative_iqr_of_winner": 0.34860170337441126,
+    "n_matrices": 104,
+    "median_run_to_run_rel_diff_of_winner": 0.07062846821890076,
+    "p90_run_to_run_rel_diff_of_winner": 0.36968126314523747,
+    "method": "median run-to-run difference of medians (train+val)",
+    "tie_tolerance": 0.08
+  },
+  "n_matrices": {
+    "train": 86,
+    "val": 18,
+    "test": 18
+  },
+  "n_test_scored": 18,
+  "test_without_oracle": [],
+  "excluded_incomplete": [],
+  "candidate_kernels": [
+    "csr_adaptive",
+    "csr_scalar",
+    "csr_vector",
+    "cusparse"
+  ],
+  "ablation_selected_feature_set": "extended_11",
+  "rowlen_rule": "mean_row_nnz in (-inf, 15.1] -> csr_scalar; mean_row_nnz in (15.1, 63.3] -> csr_adaptive; mean_row_nnz in (63.3, inf] -> cusparse",
+  "best_fixed_on_train": "csr_adaptive",
+  "input_sha256": {
+    "features": "7b17b0c8ce6bcfc7fd4b7090cea4f5ea4e3423f9a5a1b26135344af915520804",
+    "splits": "bf8709b6b7cd8e90c6403ed4f248bc81e73eb9e2bd754352c2e9c36359507cb1",
+    "catalog": "efaab741a5519609aa53522e17efdcea01b0f59a54705515893083f2ae5a863f",
+    "timings": "1511c132bf71bee58b9a58ab3b8f88c718a074f01fce7e8427ced02d8d71fd48",
+    "summary": "a7270dd33f4dee7d35023fa1047c522dbc5600e73a01e786954f7c30c86a23d8",
+    "overhead": "68c5a680982e65a7191942e3095fb37ececf606c8d7d9e601fddeab623fbc338",
+    "failures": "cfdaf90d18f96e12f13d588b5ae4076370805e85f7fefe6adfbc642590a8e30c",
+    "extended": "f3e33cda10fd82a4338cc9907655432814f275b07735441eaaf6e232e4a90e8f",
+    "manifest": "963b0cb684cedb475bbe15b9724fea7a8250d8fa5c9bb61f91bbc9992c5c5082"
+  },
+  "benchmark_manifest": {
+    "kernels": [
+      "csr_scalar",
+      "csr_vector",
+      "csr_adaptive",
+      "cusparse"
+    ],
+    "n_matrices_requested": 122,
+    "warmup": 20,
+    "reps": 100,
+    "epsilon": 1e-05,
+    "timing_mode": "graph",
+    "precision": "float32 GPU compute, float64 CPU reference",
+    "input_vector": "uniform[-1,1) float32, seed 42",
+    "adaptive_thresholds": "row length <=4:1 thread, <=16:4, <=64:16, <=512:warp, >512:block(256); fixed, not tuned",
+    "kernel_timings_rows": 488,
+    "failures": 0,
+    "git": {
+      "commit": "14ea3ad51d2e6501fe02968563d85e8ccf6484bb",
+      "branch": "research-development",
+      "dirty": true
+    }
+  },
+  "timing_protocol": "see docs/benchmark_protocol.md"
+}

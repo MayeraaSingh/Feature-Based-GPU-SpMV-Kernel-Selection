@@ -207,3 +207,16 @@ for. If the top-1 confidence is below a threshold, measure the top-m kernels and
 Threshold and m are chosen on validation. Overhead is `sum(preprocessing + r * kernel_time)` over
 calibration runs (r = repetitions per Member 1's protocol), added to end-to-end time. The report
 must state that it is a replay, and "calibration does not pay off" is a valid finding.
+
+## 12. Real-data run (`results/run_real_001`)
+
+The protocol above was executed on real GPU timings; see `docs/results.md` for the numbers and `docs/experiment_design.md` for
+the frozen design. Differences from the original plan:
+* Groups, not matrices, are the unit of statistical inference (`evaluation/group_stats.py`: cluster bootstrap, group-level
+  paired sign-flip test, Holm correction). The original matrix-level bootstrap is still reported by `evaluation/tables.py`
+  for the pilot workflow but is not used for conclusions.
+* Extra baselines: decision tree, row-length heuristic (`experiment/methods.py`); feature ablation by grouped CV on train+val.
+* The tie tolerance is measured (run-to-run noise of train+val medians) instead of a fixed 1 %.
+* Selection overhead (feature gathering + inference) is added to end-to-end cost for N = 1 ... 100,000 products and a break-even
+  analysis is reported (`experiment/overhead.py`).
+* Measurement-based calibration (section 11) remains **not implemented**.

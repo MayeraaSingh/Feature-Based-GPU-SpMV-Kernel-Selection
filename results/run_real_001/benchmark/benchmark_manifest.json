@@ -1,0 +1,23 @@
+{
+  "kernels": [
+    "csr_scalar",
+    "csr_vector",
+    "csr_adaptive",
+    "cusparse"
+  ],
+  "n_matrices_requested": 122,
+  "warmup": 20,
+  "reps": 100,
+  "epsilon": 1e-05,
+  "timing_mode": "graph",
+  "precision": "float32 GPU compute, float64 CPU reference",
+  "input_vector": "uniform[-1,1) float32, seed 42",
+  "adaptive_thresholds": "row length <=4:1 thread, <=16:4, <=64:16, <=512:warp, >512:block(256); fixed, not tuned",
+  "kernel_timings_rows": 488,
+  "failures": 0,
+  "git": {
+    "commit": "14ea3ad51d2e6501fe02968563d85e8ccf6484bb",
+    "branch": "research-development",
+    "dirty": true
+  }
+}
