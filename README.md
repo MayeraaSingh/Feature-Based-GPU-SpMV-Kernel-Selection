@@ -56,51 +56,21 @@ The team comprises three researchers collaborating across one CUDA-capable lapto
 ## Repository Structure
 
 ```text
-spmv-kernel-selection/
-├── README.md
-├── .gitignore
-├── requirements.txt
-├── LICENSE
-│
-├── configs/
-│   └── dataset_config.yaml
-│
+.
+├── configs/            dataset_config.yaml (pilot), dataset_real.yaml (real data), selector_config.yaml
 ├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── metadata/
-│       ├── matrix_catalog.csv
-│       ├── features.csv
-│       └── splits.csv
-│
-├── data_pipeline/
-│   └── README.md
-│
-├── gpu/
-│   ├── README.md
-│   ├── kernels/
-│   └── benchmarks/
-│
-├── selector/
-│   └── README.md
-│
-├── benchmarks/
-│   ├── README.md
-│   └── kernel_timings.csv
-│
-├── evaluation/
-│   └── README.md
-│
-├── docs/
-│   ├── architecture.md
-│   ├── data_dictionary.md
-│   └── benchmark_protocol.md
-│
-├── tests/
-│   └── README.md
-│
-└── scripts/
-    └── README.md
+│   ├── raw/            matrix files (git-ignored); data/raw/matrix_market/ = NIST downloads
+│   └── metadata/       pilot contracts, mm_candidates.csv, dataset_manifest.csv (provenance), real/ (real contracts)
+├── data_pipeline/      loader, CSR validator, features (+ extended), splits, CPU reference, acquisition, GPU export
+├── gpu/                CUDA C++: kernels/ (scalar, vector, adaptive, cuSPARSE, row stats), benchmarks/ (runner), CMakeLists.txt
+├── gpu_bench/          Python orchestration of the benchmark: runner, aggregation, environment capture
+├── selector/           Random Forest selector, labels, baselines (Member 3)
+├── evaluation/         metrics, group-aware statistics, tables, plots (Member 3)
+├── experiment/         methods (tree, heuristic), overhead/amortisation, analysis, run driver, figures, report
+├── scripts/            CLI entry points (see docs/reproducibility.md)
+├── results/            one directory per run id (benchmark artifacts, tables, figures, report)
+├── tests/              pytest suite (GPU tests are skipped, with a reason, when no GPU/executable)
+└── docs/               architecture, protocol, data dictionary, audit, kernel design, provenance, results, limitations
 ```
 
 ## Shared Data Contracts
@@ -167,8 +137,7 @@ python scripts/evaluate_generalization.py --config data/synthetic_demo/demo_conf
 ```
 
 Outputs go to `results/<run_id>/` (tables, figures, model card). A Colab runner is in
-[notebooks/colab_run.ipynb](notebooks/colab_run.ipynb). **No real timing data exists yet**, so no real
-results have been produced.
+[notebooks/colab_run.ipynb](notebooks/colab_run.ipynb). Real GPU timings and results are documented in [docs/results.md](docs/results.md).
 
 > **Terminology ("calibration"):** this project uses *calibration* only to mean **measurement-based
 > calibration**: run a few candidate kernels on a new matrix and count that cost as overhead. This
