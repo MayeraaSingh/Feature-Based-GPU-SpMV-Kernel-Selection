@@ -127,9 +127,23 @@ def run_pipeline(
         )
 
     # ------------------------------------------------------------------ #
+    # Optional curation: drop exact duplicate sparsity patterns             #
+    # ------------------------------------------------------------------ #
+    curation_cfg = config.get("curation") or {}
+    redundancy: List[Dict[str, str]] = []
+    if curation_cfg.get("drop_identical_patterns", False):
+        matrices, redundancy = drop_identical_patterns(matrices)
+        _write_redundancy_log(redundancy, metadata_dir / "redundancy_log.csv")
+
+    # ------------------------------------------------------------------ #
     # Build group mapping                                                  #
     # ------------------------------------------------------------------ #
     groups: Dict[str, str] = {}
+    manifest_path = dataset_cfg.get("manifest")
+    if manifest_path:
+        groups.update(_groups_from_manifest(Path(manifest_path)))
+    # Explicit config mapping and programmatic overrides take precedence over the manifest.
+    groups.update({str(k): str(v) for k, v in (config.get("matrix_groups") or {}).items()})
     if groups_override:
         groups.update(groups_override)
     # For any matrix without a group, label as "unknown"
@@ -144,6 +158,17 @@ def run_pipeline(
     for mid, csr in sorted(matrices.items()):
         rec = extract_features(csr, mid)
         feature_records.append(rec)
+
+    # Optional extended features (separate file; the 7-feature contract is unchanged)
+    if (config.get("feature_extraction") or {}).get("extended", False):
+        import pandas as pd
+        from data_pipeline.features_extended import EXTENDED_COLUMNS, extract_extended_features
+
+        ext = [extract_extended_features(csr, mid) for mid, csr in sorted(matrices.items())]
+        out = metadata_dir / "features_extended.csv"
+        out.parent.mkdir(parents=True, exist_ok=True)
+        pd.DataFrame(ext, columns=["matrix_id"] + EXTENDED_COLUMNS).to_csv(out, index=False)
+        logger.info("Extended features written: %s", out)
 
     # ------------------------------------------------------------------ #
     # Generate split manifest                                              #
@@ -204,6 +229,54 @@ def _load_config(config_path: Path | str) -> dict:
         cfg = yaml.safe_load(fh) or {}
     logger.info("Loaded config from %s", config_path)
     return cfg
+
+
+def drop_identical_patterns(matrices: Dict[str, "object"]):
+    """Keep one matrix per exact sparsity pattern (hash of indptr + indices).
+
+    Matrices that differ only in their values have identical structure, hence identical
+    structural features, and (for CSR SpMV) the same performance behaviour; keeping all of
+    them would inflate the sample size without adding structural information.  The kept
+    representative is the smallest matrix_id; every drop is logged with the reason.
+    Returns (kept_matrices, log_rows).
+    """
+    import hashlib
+
+    seen: Dict[str, str] = {}
+    kept: Dict[str, "object"] = {}
+    log: List[Dict[str, str]] = []
+    for mid in sorted(matrices):
+        m = matrices[mid]
+        h = hashlib.sha256(m.shape.__repr__().encode() + m.indptr.tobytes() + m.indices.tobytes()).hexdigest()
+        if h in seen:
+            log.append({"matrix_id": mid, "kept_representative": seen[h],
+                        "reason": "identical_sparsity_pattern", "pattern_sha256": h})
+        else:
+            seen[h] = mid
+            kept[mid] = m
+    return kept, log
+
+
+def _write_redundancy_log(rows: List[Dict[str, str]], path: Path) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", newline="", encoding="utf-8") as fh:
+        w = csv.DictWriter(fh, fieldnames=["matrix_id", "kept_representative", "reason", "pattern_sha256"])
+        w.writeheader()
+        w.writerows(rows)
+    logger.info("%d duplicate-pattern matrix(es) dropped; see %s", len(rows), path)
+
+
+def _groups_from_manifest(path: Path) -> Dict[str, str]:
+    """matrix_id -> matrix_group from a dataset provenance manifest (see data_pipeline/acquire.py)."""
+    import pandas as pd
+
+    if not path.is_file():
+        raise FileNotFoundError(f"dataset manifest not found: {path}")
+    man = pd.read_csv(path)
+    missing = {"matrix_id", "matrix_group"} - set(man.columns)
+    if missing:
+        raise ValueError(f"manifest {path} lacks column(s): {sorted(missing)}")
+    return dict(zip(man["matrix_id"].astype(str), man["matrix_group"].astype(str)))
 
 
 def _write_exclusion_log(exclusions: Dict[str, str], path: Path) -> None:

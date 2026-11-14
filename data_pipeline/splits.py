@@ -44,6 +44,9 @@ logger = logging.getLogger(__name__)
 
 SplitManifest = Dict[str, str]  # matrix_id → split label
 
+# Weight of the group-count error relative to the matrix-count error in the group-split objective.
+GROUP_COUNT_WEIGHT = 0.0  # 0 = balance matrix counts only (see docs/dataset_provenance.md for the weights tried)
+
 
 def make_splits(
     matrix_ids: List[str],
@@ -185,6 +188,8 @@ def _group_split(
         "test": (1.0 - train_ratio - val_ratio) * n_total,
     }
     counts = {"train": 0, "val": 0, "test": 0}
+    n_groups = {"train": 0, "val": 0, "test": 0}
+    g_targets = {k: v / n_total * len(names) for k, v in targets.items()}
     manifest: SplitManifest = {}
 
     for idx, g in enumerate(names):
@@ -196,11 +201,19 @@ def _group_split(
             label = empty[0]
         else:
             def cost(s: str) -> float:
-                return sum(
-                    ((counts[t] + (size if t == s else 0)) - targets[t]) ** 2 for t in counts
+                # matrix-count error + group-count error (both as fractions of the total), so a
+                # few giant families cannot absorb the whole train quota and leave train with
+                # only a handful of structural families.
+                m_err = sum(
+                    (((counts[t] + (size if t == s else 0)) - targets[t]) / n_total) ** 2 for t in counts
                 )
+                g_err = sum(
+                    (((n_groups[t] + (1 if t == s else 0)) - g_targets[t]) / len(names)) ** 2 for t in counts
+                )
+                return m_err + GROUP_COUNT_WEIGHT * g_err
             label = min(("train", "val", "test"), key=lambda s: (cost(s), s))
         counts[label] += size
+        n_groups[label] += 1
         for mid in group_map[g]:
             manifest[mid] = label
 
