@@ -43,6 +43,8 @@ The project decouples matrix preprocessing, GPU benchmarking, and selector train
 
 See [docs/architecture.md](docs/architecture.md) for full architecture details.
 
+**Complete reference:** [docs/project_documentation.md](docs/project_documentation.md) covers the background, architecture, data, GPU kernels, benchmark and evaluation methodology, results, testing, reproduction, CLI/config reference and limitations in one place.
+
 ## Team Responsibilities
 
 The team comprises three researchers collaborating across one CUDA-capable laptop and two non-CUDA laptops:
