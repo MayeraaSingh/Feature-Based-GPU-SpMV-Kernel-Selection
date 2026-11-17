@@ -1,0 +1,38 @@
+{
+  "timestamp_utc": "2026-11-14T21:46:07+00:00",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.13.7",
+  "packages": {
+    "numpy": "2.3.3",
+    "scipy": "1.16.2",
+    "pandas": "2.3.3",
+    "sklearn": "1.7.2",
+    "matplotlib": "3.10.6",
+    "yaml": "6.0.3"
+  },
+  "gpu": {
+    "name": "NVIDIA GeForce RTX 3050 6GB Laptop GPU",
+    "driver_version": "592.82",
+    "memory_total_mib": 6144.0,
+    "compute_capability": "8.6"
+  },
+  "cuda_path": null,
+  "nvcc": null,
+  "benchmark_executable": "C:\\mishka\\projects\\Feature-Based-GPU-SpMV-Kernel-Selection\\gpu\\build\\spmv_bench.exe",
+  "git": {
+    "commit": "14ea3ad51d2e6501fe02968563d85e8ccf6484bb",
+    "branch": "research-development",
+    "dirty": true
+  },
+  "telemetry_at_start": {
+    "temperature.gpu": "66",
+    "clocks.sm": "1177",
+    "clocks.mem": "5486",
+    "utilization.gpu": "0",
+    "memory.used": "0",
+    "power.draw": "10.19",
+    "pstate": "P0",
+    "throttle_reasons_active": "0x0000000000000001"
+  },
+  "note": "GPU clocks and power limits are never modified by this project."
+}

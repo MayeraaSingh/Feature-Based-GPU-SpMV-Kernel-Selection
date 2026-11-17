@@ -12,7 +12,7 @@ Numerous GPU CSR SpMV kernel variants exist (e.g., CSR-scalar, CSR-vector, CSR-a
 2. **Feature Extraction:** Develop a pipeline to extract informative, low-overhead structural features from Compressed Sparse Row (CSR) matrices.
 3. **Selector Design & Training:** Train predictive models to recommend optimal SpMV kernels based on matrix features.
 4. **Generalization Analysis:** Systematically evaluate whether the selector generalizes across held-out matrix distribution domains (e.g., synthetic vs. real-world graphs vs. regular finite-element meshes).
-5. **Confidence Calibration:** Calibrate selector uncertainty to enable fallback mechanisms when faced with out-of-distribution structures.
+5. **Measurement-Based Calibration (optional extension):** When the selector is unsure, time a small number of candidate kernels on the new matrix and pick the fastest, counting the cost of those measurements. (Earlier drafts also called this "confidence calibration"; the project now uses *calibration* only in this measurement-based sense. Probability calibration of the classifier is not part of the plan.)
 
 ## High-Level Architecture
 
@@ -56,51 +56,21 @@ The team comprises three researchers collaborating across one CUDA-capable lapto
 ## Repository Structure
 
 ```text
-spmv-kernel-selection/
-├── README.md
-├── .gitignore
-├── requirements.txt
-├── LICENSE
-│
-├── configs/
-│   └── dataset_config.yaml
-│
+.
+├── configs/            dataset_config.yaml (pilot), dataset_real.yaml (real data), selector_config.yaml
 ├── data/
-│   ├── raw/
-│   ├── processed/
-│   └── metadata/
-│       ├── matrix_catalog.csv
-│       ├── features.csv
-│       └── splits.csv
-│
-├── data_pipeline/
-│   └── README.md
-│
-├── gpu/
-│   ├── README.md
-│   ├── kernels/
-│   └── benchmarks/
-│
-├── selector/
-│   └── README.md
-│
-├── benchmarks/
-│   ├── README.md
-│   └── kernel_timings.csv
-│
-├── evaluation/
-│   └── README.md
-│
-├── docs/
-│   ├── architecture.md
-│   ├── data_dictionary.md
-│   └── benchmark_protocol.md
-│
-├── tests/
-│   └── README.md
-│
-└── scripts/
-    └── README.md
+│   ├── raw/            matrix files (git-ignored); data/raw/matrix_market/ = NIST downloads
+│   └── metadata/       pilot contracts, mm_candidates.csv, dataset_manifest.csv (provenance), real/ (real contracts)
+├── data_pipeline/      loader, CSR validator, features (+ extended), splits, CPU reference, acquisition, GPU export
+├── gpu/                CUDA C++: kernels/ (scalar, vector, adaptive, cuSPARSE, row stats), benchmarks/ (runner), CMakeLists.txt
+├── gpu_bench/          Python orchestration of the benchmark: runner, aggregation, environment capture
+├── selector/           Random Forest selector, labels, baselines (Member 3)
+├── evaluation/         metrics, group-aware statistics, tables, plots (Member 3)
+├── experiment/         methods (tree, heuristic), overhead/amortisation, analysis, run driver, figures, report
+├── scripts/            CLI entry points (see docs/reproducibility.md)
+├── results/            one directory per run id (benchmark artifacts, tables, figures, report)
+├── tests/              pytest suite (GPU tests are skipped, with a reason, when no GPU/executable)
+└── docs/               architecture, protocol, data dictionary, audit, kernel design, provenance, results, limitations
 ```
 
 ## Shared Data Contracts
@@ -121,8 +91,8 @@ All components interact via structured CSV contracts documented in [docs/data_di
    Member 1 runs benchmark sweeps on the CUDA machine, producing `kernel_timings.csv`. Member 2 generates feature sets and held-out splits.
 4. **Phase 4: Selector Training & Generalization Analysis**  
    Member 3 trains predictive selectors on feature data, benchmarks vs. oracle/baseline, and evaluates cross-distribution generalization.
-5. **Phase 5: Calibration & Research Synthesis**  
-   Member 3 implements uncertainty calibration; team integrates results and prepares project findings.
+5. **Phase 5: Measurement-Based Calibration (optional) & Research Synthesis**  
+   Member 3 evaluates measurement-based calibration as a separate, clearly labelled experiment; team integrates results and prepares project findings.
 
 ## Setup Instructions
 
@@ -167,13 +137,11 @@ python scripts/evaluate_generalization.py --config data/synthetic_demo/demo_conf
 ```
 
 Outputs go to `results/<run_id>/` (tables, figures, model card). A Colab runner is in
-[notebooks/colab_run.ipynb](notebooks/colab_run.ipynb). **No real timing data exists yet**, so no real
-results have been produced.
+[notebooks/colab_run.ipynb](notebooks/colab_run.ipynb). Real GPU timings and results are documented in [docs/results.md](docs/results.md).
 
-> **Terminology note ("calibration"):** the objectives above describe *confidence calibration*
-> (probability calibration and a low-confidence fallback). The Member 3 plan defines the optional
-> calibration study as *measurement-based*: run a few candidate kernels on a new matrix and count that
-> cost as overhead. The team should agree on one meaning before that optional step is built; see
+> **Terminology ("calibration"):** this project uses *calibration* only to mean **measurement-based
+> calibration**: run a few candidate kernels on a new matrix and count that cost as overhead. This
+> resolves the earlier inconsistency with "confidence calibration"; see
 > section 10 of [docs/selector_evaluation.md](docs/selector_evaluation.md).
 
 ## Contributing and Integrating Work

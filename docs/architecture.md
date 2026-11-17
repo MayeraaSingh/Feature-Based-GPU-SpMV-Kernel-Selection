@@ -26,7 +26,7 @@ The project is structured around clear interface contracts and decoupled stages 
 [Held-Out Generalization Evaluation]
              │
              ▼
-   [Optional Calibration]
+   [Optional Measurement-Based Calibration]
 ```
 
 ---
@@ -66,7 +66,8 @@ The project is structured around clear interface contracts and decoupled stages 
   - Fraction of optimal performance (speedup over default heuristic / cuSPARSE).
   - Generalization gap across different matrix distribution classes.
 
-### 7. Uncertainty Estimation & Calibration (Member 3)
-- Calibrates probability estimates of kernel optimality to provide confidence scores for model selections.
-- Explores fallback heuristics when confidence falls below calibrated decision thresholds.
+### 7. Measurement-Based Calibration (optional, Member 3)
+- "Calibration" in this project means measurement-based calibration (see `docs/selector_evaluation.md`, section 10): when the selector's top-1 confidence is below a threshold chosen on validation data, a few candidate kernels are timed on the new matrix and the fastest is used.
+- The cost of those measurements is added to end-to-end time. A lookup-based replay of recorded timings is a simulation and is labelled as such.
+- Probability calibration of the classifier (ECE, reliability diagrams) is not part of this project.
 

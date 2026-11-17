@@ -1,0 +1,5 @@
+oracle,csr_adaptive,csr_scalar,csr_vector,cusparse
+csr_adaptive,4,1,0,2
+csr_scalar,1,5,0,0
+csr_vector,0,0,3,0
+cusparse,1,0,0,1

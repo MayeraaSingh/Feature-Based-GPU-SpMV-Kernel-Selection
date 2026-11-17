@@ -86,3 +86,35 @@ matrix_id,split
 matrix_id,kernel_name,kernel_time_ms,preprocessing_time_ms,correctness_pass
 ```
 
+
+---
+
+## Additions for the real GPU experiment (contracts above are unchanged)
+
+All files below are additional; none replaces a contract file.
+
+### `data/metadata/real/` (real-data copies of the shared contracts, produced with `configs/dataset_real.yaml`)
+Same schemas as `matrix_catalog.csv`, `features.csv`, `splits.csv`, plus:
+* `features_extended.csv`: `matrix_id,cv_row_nnz,empty_row_frac,max_over_mean,frac_rows_gt_32` (derived from the row-pointer array only; see `data_pipeline/features_extended.py`).
+* `redundancy_log.csv`: `matrix_id,kept_representative,reason,pattern_sha256` (exact duplicate sparsity patterns that were dropped).
+
+### `data/metadata/dataset_manifest.csv` (provenance)
+`matrix_id,name,source,source_url,license,collection,set,matrix_group,application_domain,rows,cols,nnz_stored,nnz_csr,sparsity,format,field,symmetry,acquired_date,sha256_gz,sha256_mtx,download_status,validation_status,note`.
+
+### Benchmark directory `results/<run_id>/benchmark/`
+| File | Columns / content |
+|---|---|
+| `kernel_timings.csv` | the unchanged contract: `matrix_id,kernel_name,kernel_time_ms,preprocessing_time_ms,correctness_pass`. `kernel_time_ms` = median over 100 repetitions of the per-SpMV time (each repetition averages a block of `inner_iters` back-to-back SpMVs); `preprocessing_time_ms` = median host wall-clock of `prepare()+bind()` |
+| `raw_measurements.csv` | `matrix_id,phase,kernel,rep,ms` (`phase` = `kernel` or `prep`; kernel values are per-SpMV) |
+| `benchmark_summary.csv` | per matrix and kernel: `n_reps,median_ms,mean_ms,std_ms,iqr_ms,min_ms,max_ms,cv,n_outliers,prep_median_ms,prep_std_ms,timing_mode,inner_iters,max_abs_err,threshold,err_over_threshold,correct_first,correct_last` |
+| `overhead_measurements.csv` | `matrix_id,alloc_ms,h2d_ms,feature_cpu_ms,feature_gpu_ms,feature_gpu_matches_cpu,timer_floor_ms,mem_needed_mb_est` |
+| `host_stage_timings.csv` | `matrix_id,load_validate_ms,feature_extract_python_ms,export_ms` (Python wall clock) |
+| `gpu_telemetry.csv` | `nvidia-smi` samples (temperature, SM and memory clock, utilisation, memory, power, P-state, throttle reasons) before and after each matrix |
+| `benchmark_failures.csv` | `matrix_id,kernel_name,stage,reason` (kernels that did not run to completion; no row exists for them in `kernel_timings.csv`) |
+| `environment.json`, `benchmark_manifest.json` | GPU / driver / CUDA / compiler / package versions, git state, protocol parameters |
+
+### Experiment run directory `results/<run_id>/`
+`run_manifest.json`, `dataset_manifest.json`, `model_card.json`, `config.yaml`, `environment.json`, `tuning_results.csv`,
+`feature_ablation_cv.csv`, `per_matrix_test.csv`, `summary_overall.csv`, `summary_by_group.csv`, `confusion_matrix.csv`,
+`paired_comparisons*.csv`, `amortised_cost.csv`, `break_even.csv`, `tolerance_sensitivity.csv`, `exp1_*.csv`, `exp6_*.csv`,
+`benchmark_summary.csv`, `figures/`, `report.md`, `TEST_EVALUATED.json` (one-shot guard), `model.joblib` (git-ignored).

@@ -191,13 +191,13 @@ Markdown tables, a banner plus watermark on every figure, and the marker file.
 | T3 | A missing candidate-kernel row excludes the matrix (reported) | Implemented |
 | T4 | `val` vs `validation` in the original brief | Contract wins (`val`) |
 
-### Terminology: two meanings of "calibration"
-`README.md` and `docs/architecture.md` describe **confidence calibration** (probability
-calibration, ECE, reliability diagrams, low-confidence fallback). The Member 3 brief defines
-**measurement-based calibration**: run a subset of candidate kernels on the new matrix and
-count that cost as overhead. The implementation (Milestone 6, optional, not started) follows
-the brief. **Members 1 and 2 must agree on this wording** before it is built; the shared docs
-have deliberately not been edited.
+### Terminology: "calibration" (resolved)
+Earlier drafts of `README.md` and `docs/architecture.md` used *calibration* for **confidence
+calibration** (probability calibration, ECE, reliability diagrams), while the Member 3 brief
+defined **measurement-based calibration** (run a subset of candidate kernels on the new matrix
+and count that cost as overhead). The project now uses the measurement-based meaning only;
+the README and architecture documents were updated accordingly. Probability calibration of
+the Random Forest is out of scope.
 
 ## 11. Optional calibration study (not implemented)
 
@@ -207,3 +207,16 @@ for. If the top-1 confidence is below a threshold, measure the top-m kernels and
 Threshold and m are chosen on validation. Overhead is `sum(preprocessing + r * kernel_time)` over
 calibration runs (r = repetitions per Member 1's protocol), added to end-to-end time. The report
 must state that it is a replay, and "calibration does not pay off" is a valid finding.
+
+## 12. Real-data run (`results/run_real_001`)
+
+The protocol above was executed on real GPU timings; see `docs/results.md` for the numbers and `docs/experiment_design.md` for
+the frozen design. Differences from the original plan:
+* Groups, not matrices, are the unit of statistical inference (`evaluation/group_stats.py`: cluster bootstrap, group-level
+  paired sign-flip test, Holm correction). The original matrix-level bootstrap is still reported by `evaluation/tables.py`
+  for the pilot workflow but is not used for conclusions.
+* Extra baselines: decision tree, row-length heuristic (`experiment/methods.py`); feature ablation by grouped CV on train+val.
+* The tie tolerance is measured (run-to-run noise of train+val medians) instead of a fixed 1 %.
+* Selection overhead (feature gathering + inference) is added to end-to-end cost for N = 1 ... 100,000 products and a break-even
+  analysis is reported (`experiment/overhead.py`).
+* Measurement-based calibration (section 11) remains **not implemented**.
